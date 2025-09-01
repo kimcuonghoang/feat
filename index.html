@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gửi đến Mai Phuong 💌</title>
+    <style>
+      :root {
+        --bg1: #ffdde1;
+        --bg2: #ee9ca7;
+        --pink: #ff4d6d;
+        --deep: #d6336c;
+        --text: #2a2a2a;
+        --white: #fff;
+        --shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
+          Arial, "Noto Sans", sans-serif;
+      }
+      body {
+        background: radial-gradient(1200px 800px at 20% 10%, #fff8, transparent),
+          linear-gradient(135deg, var(--bg2), var(--bg1));
+        color: var(--text);
+        overflow-x: hidden;
+      }
+      /* Floating hearts background */
+      .hearts {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+      .heart {
+        position: absolute;
+        font-size: 18px;
+        animation: float 8s linear infinite;
+        opacity: 0.7;
+        filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
+      }
+      @keyframes float {
+        from {
+          transform: translateY(110vh) rotate(0);
+        }
+        to {
+          transform: translateY(-10vh) rotate(360deg);
+        }
+      }
+
+      /* Card */
+      .wrap {
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        position: relative;
+        z-index: 1;
+      }
+      .card {
+        width: min(720px, 92vw);
+        background: rgba(255, 255, 255, 0.86);
+        backdrop-filter: blur(10px);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .header {
+        padding: 24px 24px 8px;
+        text-align: center;
+      }
+      .title {
+        font-size: clamp(28px, 4.5vw, 40px);
+        margin: 0;
+        color: var(--deep);
+        letter-spacing: 0.5px;
+      }
+      .subtitle {
+        margin: 6px 0 16px;
+        opacity: 0.8;
+      }
+      .content {
+        padding: 0 24px 24px;
+      }
+
+      .btn {
+        appearance: none;
+        border: none;
+        border-radius: 999px;
+        padding: 14px 22px;
+        background: linear-gradient(90deg, #ff4d6d, #ff758f);
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: var(--shadow);
+        transition: transform 0.15s ease, filter 0.2s ease;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+      .btn.ghost {
+        background: #fff;
+        color: var(--deep);
+        border: 2px solid #ffd1dc;
+      }
+      .btns {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .panel {
+        display: none;
+      }
+      .panel.active {
+        display: block;
+      }
+
+      .type {
+        min-height: 88px;
+        line-height: 1.55;
+        font-size: 18px;
+      }
+      .bubble {
+        background: #fff;
+        border: 2px solid #ffd9e1;
+        padding: 14px 16px;
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      .question {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        margin-top: 10px;
+      }
+      .choice {
+        display: flex;
+        gap: 12px;
+      }
+
+      .stamp {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #ffe3ea;
+        color: #c2255c;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 700;
+      }
+
+      .footer {
+        padding: 16px;
+        text-align: center;
+        font-size: 12px;
+        opacity: 0.7;
+      }
+
+      /* Confetti canvas */
+      canvas#confetti {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      /* Timeline */
+      .timeline {
+        margin-top: 14px;
+        display: grid;
+        gap: 10px;
+      }
+      .tl-item {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: 10px;
+        align-items: start;
+      }
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--pink);
+        margin-top: 6px;
+        box-shadow: 0 0 0 4px #ffd9e1;
+      }
+      .tl-card {
+        background: #fff;
+        border: 1px solid #ffe0e7;
+        border-radius: 14px;
+        padding: 10px 12px;
+      }
+
+      /* Responsive */
+      @media (max-width: 480px) {
+        .choice {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="confetti"></canvas>
+    <div class="hearts" id="hearts"></div>
+
+    <div class="wrap">
+      <div class="card" id="card">
+        <div class="header">
+          <div class="stamp">💌 Lời muốn nói</div>
+          <h1 class="title">
+            Gửi đến <span id="crushName">Mai Phuong</span> ✨
+          </h1>
+          <p class="subtitle">
+            Một chiếc trang nhỏ xíu nhưng là tấm lòng rất to.
+          </p>
+        </div>
+
+        <div class="content">
+          <!-- Panel 1: Lời mở đầu -->
+          <section id="panel-intro" class="panel active">
+            <div class="bubble type" id="typewriter"></div>
+            <div class="btns" style="margin-top: 14px">
+              <button class="btn" id="startBtn">Mở điều bất ngờ</button>
+              <button class="btn ghost" id="shareBtn">Chia sẻ trang này</button>
+            </div>
+
+            <div class="timeline">
+              <div class="tl-item">
+                <div class="dot"></div>
+                <div class="tl-card">
+                  Ngày đầu gặp, tim bỗng đập nhanh hơn bình thường.
+                </div>
+              </div>
+              <div class="tl-item">
+                <div class="dot"></div>
+                <div class="tl-card">
+                  Nhắn tin với <b id="crushName2">Mai Phuong</b>, tự nhiên thấy
+                  ngày dài lại hóa rất ngắn.
+                </div>
+              </div>
+              <div class="tl-item">
+                <div class="dot"></div>
+                <div class="tl-card">
+                  Viết trang này… mong một cái gật đầu dịu dàng. 🫶
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Panel 2: Câu hỏi chính -->
+          <section id="panel-ask" class="panel">
+            <div
+              class="bubble"
+              style="text-align: center; font-size: 20px; font-weight: 700"
+            >
+              Này <span id="crushName3">Mai Phuong</span> ơi, <br />em đồng ý
+              cho anh được làm người đặc biệt của em chứ? 💖
+            </div>
+            <div class="question">
+              <div class="choice">
+                <button class="btn" id="yesBtn">Dạ, Đồng ý 🥹</button>
+                <button class="btn ghost" id="noBtn">Để suy nghĩ đã…</button>
+              </div>
+              <small>⚠️ Nút "Để suy nghĩ" hơi… khó bấm đó nha 😜</small>
+            </div>
+          </section>
+
+          <!-- Panel 3: Đồng ý -->
+          <section id="panel-yes" class="panel">
+            <div class="bubble" style="text-align: center">
+              <h2 style="margin: 0.2em 0; color: var(--deep)">Yay!!! 🎉</h2>
+              <p>
+                Từ giờ, anh hứa sẽ cố gắng làm
+                <span id="crushName4">Mai Phuong</span> cười nhiều hơn mỗi ngày.
+                <br />Cảm ơn em vì đã đồng ý! 💗
+              </p>
+            </div>
+            <div class="btns" style="margin-top: 14px">
+              <button class="btn" id="dateBtn">
+                Hẹn hò ngay cuối tuần này nhé!
+              </button>
+              <button class="btn ghost" id="copyBtn">
+                Sao chép lời tỏ tình
+              </button>
+            </div>
+          </section>
+
+          <!-- Panel 4: Từ chối (tếu táo) -->
+          <section id="panel-no" class="panel">
+            <div class="bubble" style="text-align: center">
+              <p>
+                Ôi trời… chắc nút kia chạy nhanh quá 😅<br />Thôi để anh cố gắng
+                thêm, hẹn em một lần tỏ tình khác xịn hơn!
+              </p>
+            </div>
+          </section>
+        </div>
+
+        <div class="footer">
+          <span id="today"></span> · Làm bằng cả trái tim ❤️
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ======= CONFIG =======
+      const CRUSH_NAME = "Mai Phuong"; // Đổi tên tại đây nếu cần
+
+      // ======= UI helpers =======
+      const $ = (s) => document.querySelector(s);
+      const show = (id) => {
+        document
+          .querySelectorAll(".panel")
+          .forEach((p) => p.classList.remove("active"));
+        $(id).classList.add("active");
+      };
+
+      // Điền tên tự động
+      ["#crushName", "#crushName2", "#crushName3", "#crushName4"].forEach(
+        (sel) => {
+          $(sel).textContent = CRUSH_NAME;
+        }
+      );
+
+      // Typewriter text
+      const lines = [
+        `Anh viết vài dòng này…`,
+        `vì mỗi khi nghĩ đến ${CRUSH_NAME}, tim anh hơi rung rung một xíu.`,
+        `Không cần hoa mỹ, chỉ muốn nói thật lòng thôi:`,
+        `Anh thích ${CRUSH_NAME} nhiều lắm! 💗`,
+      ];
+      async function typewriter(el, arr, speed = 34, pause = 400) {
+        for (const line of arr) {
+          for (const ch of line) {
+            el.innerHTML += ch;
+            await new Promise((r) => setTimeout(r, speed));
+          }
+          el.innerHTML += "<br/>";
+          await new Promise((r) => setTimeout(r, pause));
+        }
+      }
+
+      // Floating hearts
+      function spawnHearts() {
+        const wrap = document.getElementById("hearts");
+        for (let i = 0; i < 24; i++) {
+          const h = document.createElement("div");
+          h.className = "heart";
+          h.style.left = Math.random() * 100 + "vw";
+          h.style.animationDuration = 6 + Math.random() * 6 + "s";
+          h.style.fontSize = 14 + Math.random() * 26 + "px";
+          h.style.opacity = 0.5 + Math.random() * 0.5;
+          h.textContent = ["❤", "💖", "💘", "💗", "💝"][
+            Math.floor(Math.random() * 5)
+          ];
+          wrap.appendChild(h);
+        }
+      }
+
+      // Confetti
+      const confetti = (() => {
+        const canvas = document.getElementById("confetti");
+        const ctx = canvas.getContext("2d");
+        let W,
+          H,
+          parts = [];
+        let running = false;
+        let raf;
+        function resize() {
+          W = canvas.width = innerWidth;
+          H = canvas.height = innerHeight;
+        }
+        function launch() {
+          if (running) return;
+          running = true;
+          resize();
+          parts = Array.from({ length: 200 }, () => ({
+            x: Math.random() * W,
+            y: -20 - Math.random() * H,
+            r: 4 + Math.random() * 6,
+            vx: (Math.random() - 0.5) * 2,
+            vy: 2 + Math.random() * 3,
+            a: Math.random() * Math.PI,
+          }));
+          loop();
+          setTimeout(stop, 2200);
+        }
+        function loop() {
+          ctx.clearRect(0, 0, W, H);
+          for (const p of parts) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.a += 0.05;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.a);
+            ctx.fillStyle = [
+              "#ff4d6d",
+              "#ffb3c1",
+              "#ffe066",
+              "#74c0fc",
+              "#b197fc",
+            ][Math.floor(Math.random() * 5)];
+            ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r);
+            ctx.restore();
+          }
+          raf = requestAnimationFrame(loop);
+        }
+        function stop() {
+          running = false;
+          cancelAnimationFrame(raf);
+          ctx.clearRect(0, 0, W, H);
+        }
+        addEventListener("resize", resize);
+        return { launch, stop };
+      })();
+
+      // Play tiny happy tone (Web Audio)
+      function beep() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = "triangle";
+          o.frequency.value = 660;
+          g.gain.value = 0.05;
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start();
+          setTimeout(() => {
+            o.frequency.exponentialRampToValueAtTime(
+              990,
+              ctx.currentTime + 0.2
+            );
+          }, 50);
+          setTimeout(() => {
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
+            o.stop(ctx.currentTime + 0.4);
+          }, 180);
+        } catch (e) {}
+      }
+
+      // Rogue "No" button
+      function makeNoRun() {
+        const no = document.getElementById("noBtn");
+        no.addEventListener("mouseover", () => {
+          const rect = no.getBoundingClientRect();
+          const nx = Math.max(
+            6,
+            Math.min(
+              innerWidth - rect.width - 6,
+              rect.left + (Math.random() * 200 - 100)
+            )
+          );
+          const ny = Math.max(
+            6,
+            Math.min(
+              innerHeight - rect.height - 6,
+              rect.top + (Math.random() * 200 - 100)
+            )
+          );
+          no.style.position = "fixed";
+          no.style.left = nx + "px";
+          no.style.top = ny + "px";
+        });
+      }
+
+      // Copy helper
+      async function copy(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          alert("Đã sao chép! Dán vào tin nhắn gửi ngay nhé 💬");
+        } catch {
+          prompt(
+            "Thiết bị không hỗ trợ copy tự động. Chọn & copy thủ công đoạn này:",
+            text
+          );
+        }
+      }
+
+      // Share
+      document
+        .getElementById("shareBtn")
+        .addEventListener("click", async () => {
+          const url = location.href;
+          const title = `Gửi đến ${CRUSH_NAME}`;
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title,
+                text: "Mở điều bất ngờ nhé!",
+                url,
+              });
+            } catch (e) {}
+          } else {
+            await copy(`${title} – ${url}`);
+          }
+        });
+
+      // Start
+      document.getElementById("startBtn").addEventListener("click", () => {
+        show("#panel-ask");
+        beep();
+      });
+
+      // Yes / No
+      document.getElementById("yesBtn").addEventListener("click", () => {
+        show("#panel-yes");
+        confetti.launch();
+        beep();
+      });
+      document.getElementById("noBtn").addEventListener("click", () => {
+        show("#panel-no");
+      });
+
+      // Date button
+      document.getElementById("dateBtn").addEventListener("click", () => {
+        const d = new Date();
+        const days = [
+          "Chủ nhật",
+          "Thứ hai",
+          "Thứ ba",
+          "Thứ tư",
+          "Thứ năm",
+          "Thứ sáu",
+          "Thứ bảy",
+        ];
+        const next = new Date();
+        const add = (6 - d.getDay() + 7) % 7; // tới Thứ bảy
+        next.setDate(d.getDate() + add);
+        alert(
+          `Hẹn ${CRUSH_NAME} vào ${
+            days[next.getDay()]
+          } (${next.toLocaleDateString()}) nha! 🗓️`
+        );
+      });
+
+      // Copy confession
+      document.getElementById("copyBtn").addEventListener("click", () => {
+        copy(
+          `Gửi ${CRUSH_NAME}, anh thích em thật nhiều. Cho anh cơ hội được ở bên cạnh, quan tâm và làm em cười mỗi ngày nhé! 💖`
+        );
+      });
+
+      // Today footer
+      document.getElementById("today").textContent = new Date().toLocaleString(
+        "vi-VN"
+      );
+
+      // Init
+      spawnHearts();
+      makeNoRun();
+      typewriter(document.getElementById("typewriter"), lines);
+    </script>
+  </body>
+</html>
